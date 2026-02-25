@@ -1,0 +1,60 @@
+.Transcript-container {
+  width: 340px;
+  height: 90%;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(240, 241, 242, 1);
+  backdrop-filter: blur(32px);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  border-radius: 14px;
+
+}
+
+.conv-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ✅ THIS IS THE SCROLL AREA */
+.text-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* scrollbar (optional, clean look) */
+.text-container::-webkit-scrollbar {
+  width: 4px;
+}
+.text-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.transcript-line {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  color: #232323;
+}
+
+.placeholder-text {
+  color: #888;
+  font-size: 14px;
+}
+
+/* bottom fade effect */
+.bottom-elipse {
+  height: 40px;
+  margin-top: -40px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 1)
+  );
+  pointer-events: none;
+}

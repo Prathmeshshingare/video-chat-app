@@ -1,0 +1,380 @@
+/* =========================
+   Container & Headings
+========================= */
+.consult-container {
+  width: 100%;
+  margin: auto;
+  padding: 10px;
+}
+.call-connect-container {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.call-connect-container h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.call-connect-container p {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+/* =========================
+   Video Layout
+========================= */
+.video-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+.video-box {
+  background: #f5f7fa;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 480px;
+  border-radius: 16px;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.video-box h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: #333;
+}
+/* 
+.video {
+  width: 100%;
+  height: 100%;
+  background: black;
+  border: #333;
+  border-radius: 16px;
+  object-fit: cover;
+} */
+
+/* =========================
+   Video Controls
+========================= */
+.video-controls {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.on-off-btn:hover {
+  background-color: #04f8f8;
+}
+
+/* =========================
+   End Call Button
+========================= */
+.end-call-container {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+
+/* =========================
+   Speech / Notes Section
+========================= */
+.speech-container {
+  margin-top: 25px;
+  text-align: center;
+  padding: 5px;
+}
+
+.loader-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px 0;
+  width: 100%;
+}
+
+/* =========================
+   Buttons - Modern Look
+========================= */
+
+/* Common button style */
+button {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Call Button */
+.call-btn {
+  padding: 12px 28px;
+  font-size: 16px;
+  background: linear-gradient(135deg, #0b5ed7, #094ab2);
+  color: #fff;
+  border-radius: 12px;
+}
+
+.call-btn:hover {
+  background: linear-gradient(135deg, #094ab2, #083a91);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.call-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.call-btn.enabled {
+  opacity: 1;
+  cursor: pointer;
+}
+
+/* Dictation Buttons */
+.btn.primary,
+.dictation-btn {
+  padding: 12px 28px;
+  font-size: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #198754, #146c43);
+  border-radius: 10px;
+}
+
+.btn.primary:hover,
+.dictation-btn:hover {
+  background: linear-gradient(135deg, #146c43, #11532e);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn.warning {
+  padding: 12px 28px;
+  font-size: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+  border-radius: 10px;
+}
+
+.btn.warning:hover {
+  background: linear-gradient(135deg, #e0a800, #c69500);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+.end-call-btn {
+  padding: 12px 28px;
+  font-size: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #ff0e0e, #e00000);
+  border-radius: 10px;
+}
+.end-call-btn:hover {
+  padding: 12px 28px;
+  font-size: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #e20202, #c00202);
+  border-radius: 10px;
+}
+
+/* Save / Clear Buttons */
+.sv-cl-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.clr-btn {
+  padding: 12px 28px;
+  font-size: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #f8dc3e, #e0c330);
+  border-radius: 10px;
+}
+
+.clr-btn:hover {
+  background: linear-gradient(135deg, #e0c330, #c6a800);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.scr-btn {
+  padding: 12px 28px;
+  font-size: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #f53232, #c12d2d);
+  border-radius: 10px;
+}
+
+.scr-btn:hover {
+  background: linear-gradient(135deg, #c12d2d, #9a2222);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* On-Off Buttons (Mute / Camera) */
+.on-off-btn {
+  padding: 10px 20px;
+  font-size: 15px;
+  background: linear-gradient(135deg, #54cfee, #04f8f8);
+  color: #fff;
+  border-radius: 10px;
+}
+
+.on-off-btn:hover {
+  background: linear-gradient(135deg, #04f8f8, #00c2c2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.center-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.toggle-btn-container {
+  display: flex;
+  margin-top: 20px;
+  gap: 20px;
+}
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 960px) {
+  .video-box {
+    width: 90%;
+  }
+
+  .speech-container textarea {
+    width: 95%;
+  }
+
+  .btn.primary,
+  .btn.warning,
+  .clr-btn,
+  .scr-btn,
+  .on-off-btn {
+    width: 90%;
+    margin: 5px 0;
+  }
+}
+
+/* =============================
+   CALL FULL SCREEN LAYOUT
+============================= */
+
+.call-layout {
+  position: relative;
+  width: 80%;
+  height: 90vh;
+  left: 145px;
+  padding:0 20px 20px 0px;
+  background: #c2bdca;
+  border-radius: 25px;
+  overflow: hidden;
+
+  display: flex; 
+} /* Top badges */
+.call-header {
+  position: absolute;
+  top: 45px;
+  left: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 5;
+}
+.user-badge {
+  background: #e7cfd1;
+  padding: 6px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.timer-badge {
+  background: #e7cfd1;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+} /* Center Remote Video (Circle) */
+.remote-container {
+ flex: 1;
+  height: 100%;
+  position: relative;
+  right: 50px;
+  top: 30px;
+
+}
+.remote-video {
+
+ width: 100%;
+  height: 95%;
+  top:5px;
+  object-fit: cover;
+  border-radius: 14px;
+    background: rgba(255, 255, 255, 1);
+} /* Local Video Small Box */
+.local-container {
+  position: absolute;
+  right: 20px;
+  bottom: 80px;
+  width: 220px;
+  height: 160px;
+}
+.sidebar-section {
+  margin-top: 42px;
+  width: 320px;
+  height: 92%;
+  background: white;
+  border-radius: 14px;
+}
+.local-video {
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+  object-fit: cover;
+}
+.you-badge {
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  background: #e7cfd1;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+} /* Bottom Controls */
+.call-controls {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+.control-btn {
+  padding: 14px 22px;
+  border-radius: 50px;
+  border: none;
+  font-weight: 600;
+  background: #ffffff;
+  cursor: pointer;
+}
+.end-call-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: red;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+

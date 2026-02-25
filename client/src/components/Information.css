@@ -1,0 +1,106 @@
+.Info-container{
+    position: fixed;
+   width: 328px;
+   height: 570px;
+opacity: 1;
+gap: 16px;
+padding: 12px;
+background: rgba(255, 255, 255, 1);
+border: 1px solid rgba(240, 241, 242, 1);
+}
+.export-box{
+    width: 240px;
+
+opacity: 1;
+gap: 8px;
+display: flex;
+justify-content: center;
+align-items: center;
+
+}
+.icon{
+border-width: 1.6px;
+opacity: 1;
+
+}
+.clickable-text{
+    width: 246px;
+opacity: 1;
+font-family: Montserrat;
+font-weight: 650;
+font-style: SemiBold;
+font-size: 14px;
+line-height: 18px;
+letter-spacing: 0%;
+text-align: center;
+text-transform: capitalize;
+text-decoration: underline;
+text-decoration-style: solid ;
+text-decoration-thickness: 0%;
+color: rgba(90, 138, 234, 1);
+}
+.patient-info-container{
+    width: 316px;
+      height: 500px;
+opacity: 1;
+gap: 8px;
+
+}
+.info-container{
+
+ width: 284px;
+ height: 220px;
+ left: 5px;
+border-radius: 14px;
+border-width: 1px;
+opacity: 1;
+gap: 14px;
+padding: 16px;
+background: rgb(255, 255, 255,1);
+border: 1px solid rgba(226, 227, 229, 0.4);
+box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.04);
+}
+.partner-info{
+ 
+     width: 270px;
+     bottom: 0px;
+     margin-right: 100px;
+ height: 10px;
+border-radius: 14px;
+border-width: 1px;
+opacity: 1;
+gap: 14px;
+padding: 16px;
+background: rgb(255, 255, 255,1);
+border: 1px solid rgba(226, 227, 229, 0.4);
+box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.04);
+}
+
+.text-div{
+  width: 152px;
+border-radius: 10px;
+opacity: 1;
+}
+.textp1{
+    width: 200px;
+opacity: 1;
+font-family: Nunito;
+font-weight: 400;
+font-style: Regular;
+font-size: 14px;
+line-height: 5px;
+letter-spacing: 0%;
+color: rgba(53, 53, 53, 1);
+
+}
+.textp2{
+    font-family: Nunito;
+font-weight: 550;
+font-style: SemiBold;
+font-size: 14px;
+line-height: 18px;
+letter-spacing: 0%;
+color: rgba(53, 53, 53, 1);
+
+
+}

@@ -1,0 +1,62 @@
+/* Full page center */
+.role-btn-container {
+  width: 320px;
+  margin: 100px auto;
+  padding: 30px 25px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+
+  text-align: center;
+}
+
+/* Heading */
+.role-btn-container h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Buttons */
+.role-btn-container button {
+  width: 100%;
+  padding: 12px 0;
+
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Doctor button */
+.role-btn-container button:first-of-type {
+  background-color: #198754; /* green */
+  color: white;
+}
+
+/* Patient button */
+.role-btn-container button:last-of-type {
+  background-color: #0d6efd; /* blue */
+  color: white;
+}
+
+/* Hover effects */
+.role-btn-container button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Active (click) */
+.role-btn-container button:active {
+  transform: scale(0.98);
+}
