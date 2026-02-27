@@ -6,6 +6,15 @@ import { IoMdMicOff } from "react-icons/io";
 import { MdCallEnd } from "react-icons/md";
 import { HiMiniSpeakerWave } from "react-icons/hi2";
 import { HiMiniSpeakerXMark } from "react-icons/hi2";
+import { MdWifiCalling3 } from "react-icons/md";
+import RightSideBar from "../components/RightSideBar";
+import Transcript from "../components/Transcript";
+import Chat from "../components/Chat";
+import Information from "../components/Information";
+import Appointment from "../components/Appointment";
+import AppointmentDetails from "../components/AppointmentDetails";
+import TopNav from "../components/TopNav";
+import useCallTimer from "../hooks/useCallTimer";
 
 const Patient = () => {
   const { roomId } = useParams();
@@ -30,7 +39,19 @@ const Patient = () => {
   const [myStream, setMyStream] = useState(null);
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
+  const [speakerOn, setSpeakerOn] = useState(true);
+  const [active, setActive] = useState("");
+  const [notes, setNotes] = useState("");
 
+  const [isCallActive, setIsCallActive] = useState(false);
+  const { formattedTime, resetTimer } = useCallTimer(isCallActive);
+  const [chatMessages, setChatMessages] = useState([]);
+
+  useEffect(() => {
+    if (myStream) {
+      setIsCallActive(true); // 🔥 START TIMER
+    }
+  }, [myStream]);
   /* =========================
       Create Peer Connection
   ========================== */
@@ -44,6 +65,7 @@ const Patient = () => {
     peerRef.current.ontrack = (event) => {
       event.streams[0].getTracks().forEach((track) => {
         remoteStreamRef.current.addTrack(track);
+        setIsCallActive(true);
       });
     };
 
@@ -120,6 +142,18 @@ const Patient = () => {
     socketRef.current.onmessage = async (e) => {
       const data = JSON.parse(e.data);
 
+      // 🔥 CHAT MESSAGE
+     if (data.type === "chat") {
+  setChatMessages((prev) =>
+    prev.map((msg) =>
+      msg.id === data.id ? { ...msg, status: "read" } : msg
+    )
+  );
+
+  setChatMessages((prev) => [...prev, { ...data, status: "read" }]);
+  return;
+}
+
       if (data.type === "offer") {
         await startCamera();
         await peerRef.current.setRemoteDescription(
@@ -189,7 +223,8 @@ const Patient = () => {
 
         // Patient receives transcripts but doesn't display them
         if (data.type === "transcript") {
-          console.log(`📝 ${data.speaker}: ${data.text}`);
+           const newLine = ` ${data.speaker}: ${data.text}\n`;
+           setNotes((prev) => prev +newLine);
         }
 
         if (data.type === "error") {
@@ -301,6 +336,16 @@ const Patient = () => {
     setCameraOn((prev) => !prev);
   };
 
+  const toggleSpeaker = () => {
+    if (!remoteVideoRef.current) return;
+
+    const videoElement = remoteVideoRef.current;
+
+    // Toggle mute
+    videoElement.muted = !videoElement.muted;
+
+    setSpeakerOn((prev) => !prev);
+  };
   /* =========================
     End Call
 ========================= */
@@ -345,6 +390,8 @@ const Patient = () => {
       setIsCaller(false);
       setMicOn(true);
       setCameraOn(true);
+      setIsCallActive(false);
+      resetTimer();
 
       console.log("📴 Call ended successfully");
     } catch (err) {
@@ -356,129 +403,107 @@ const Patient = () => {
       UI
   ========================== */
   return (
-    <div className="consult-container">
-      <div
-        style={{
-          marginBottom: 20,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <h2>🏥 Patient Room: {roomId}</h2>
-      </div>
+ <div className="consult-containerp">
+      <div className="call-layoutp">
+        {/* VIDEO AREA */}
+        <div className="topnavp">
+          <TopNav />
+        </div>
+        <div className="remote-container-and-rightsidebar-divp">
+          <div className="remote-containerp">
+            <div className="call-headerp">
+              <div className="user-badgep">Patient</div>
+              <div className="timer-badgep">{formattedTime}</div>
+            </div>
 
-      <div
-        style={{
-          marginBottom: 20,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        {/* <p style={{ color: connected ? "green" : "orange", margin: 5 }}>
-           {connected ? "✅ Connected" : "⏳ Connecting..."} 
-        </p>*/}
-        <p style={{ color: sttConnected ? "green" : "orange", margin: 5 }}>
-          {sttConnected ? "✅ Connected to Doctor" : "⏳ Connecting to Doctor"}
-        </p>
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className="remote-videop"
+            />
+
+            {/* Local Video */}
+            <div className="local-containerp">
+              <div className="you-badgep">You</div>
+              <video
+                ref={localVideoRef}
+                autoPlay
+                muted
+                playsInline
+                className="local-videop"
+              />
+            </div>
+
+            {/* Controls */}
+            <div className="call-controlsp">
+              {!isCaller && (
+                <button className="control-btnp" onClick={startCall}>
+                  <MdWifiCalling3 />
+                </button>
+              )}
+
+              <button onClick={toggleMic} className="control-btnp">
+                {micOn ? (
+                  <FaMicrophoneAlt />
+                ) : (
+                  <IoMdMicOff style={{ color: "red" }} />
+                )}
+              </button>
+
+              <button className="end-call-circlep" onClick={endCall}>
+                <MdCallEnd color="white" />
+              </button>
+
+              <button onClick={toggleCamera} className="control-btnp">
+                {cameraOn ? (
+                  <FaVideo />
+                ) : (
+                  <FaVideoSlash style={{ color: "red" }} />
+                )}
+              </button>
+
+              <button onClick={toggleSpeaker} className="control-btnp">
+                {speakerOn ? (
+                  <HiMiniSpeakerWave />
+                ) : (
+                  <HiMiniSpeakerXMark style={{ color: "red" }} />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* SIDEBAR — OUTSIDE */}
+       <div className={`sidebar-wrapperp ${active ? "active" : ""}`}>
+            {!active && <RightSideBar active={active} setActive={setActive} />}
+            {active && (
+              <div className="sidebar-sectionp">
+                <AppointmentDetails active={active} setActive={setActive} />
+                {active === "chat" &&  <Chat
+    socket={socketRef.current}
+    role="Patient"
+    messages={chatMessages}
+    setMessages={setChatMessages}
+  />}
+                {active === "Transcript" && <Transcript notes={notes} />}
+                {active === "info" && <Information />}
+                {active === "appt" && <Appointment />}
+              </div>
+            )}{" "}
+          </div>
+        </div>
       </div>
-      <div
-        style={{
-          marginBottom: 20,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        {!isCaller && (
-          <button
-            onClick={startCall}
-            className="call-btn enabled"
+      <div>
+        {myStream && (
+          <div
             style={{
-              padding: "10px 20px",
-              fontSize: 16,
-              backgroundColor: "#4CAF50",
-              color: "white",
-              border: "none",
-              borderRadius: 5,
-              cursor: "pointer",
-              marginBottom: 20,
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "15px",
             }}
-          >
-            📞 Start Call
-          </button>
+          ></div>
         )}
       </div>
-      <div className="call-layout">
-        {/* Top Info */}
-        <div className="call-header">
-          <div className="user-badge">Patient</div>
-          <div className="timer-badge">04:60</div>
-        </div>
-
-        {/* Remote Video */}
-        <div className="remote-container">
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            playsInline
-            className="remote-video"
-          />
-        </div>
-
-        {/* Local Video */}
-        <div className="local-container">
-          <div className="you-badge">You</div>
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            className="local-video"
-          />
-        </div>
-
-        {/* Controls */}
-        <div className="call-controls">
-          {!isCaller && (
-            <button className="control-btn" onClick={startCall}>
-              Start
-            </button>
-          )}
-          <button onClick={toggleMic} className="control-btn">
-            {micOn ? (
-              <FaMicrophoneAlt />
-            ) : (
-              <IoMdMicOff style={{ color: "red" }} />
-            )}
-          </button>
-
-          <button className="end-call-circle" onClick={endCall}>
-            <MdCallEnd color="white" />
-          </button>
-
-          <button onClick={toggleCamera} className="control-btn">
-            {cameraOn ? <FaVideo /> : <FaVideoSlash style={{ color: "red" }} />}
-          </button>
-        </div>
-      </div>
-
-      {/* <div
-        style={{
-          marginTop: 30,
-          padding: 20,
-          backgroundColor: "#f0f0f0",
-          borderRadius: 8,
-        }}
-      >
-        <p style={{ margin: 0, color: "#666" }}>
-          ℹ️ Your conversation is being transcribed for the doctor's notes.
-        </p>
-        <p style={{ margin: "10px 0 0 0", color: "#999", fontSize: 14 }}>
-          Audio → Django Gateway → Deepgram → Doctor's Screen
-        </p>
-      </div>*/}
     </div>
   );
 };

@@ -1,32 +1,32 @@
 
 .appint-detail-box-container{
-  position: fixed;
-width: 329px;
+  position: relative;
+width: 320px;
 height: 100vh;
 margin-top: 40px;
 border-radius: 16px;
 border-width: 1px;
 opacity: 1;
 top: 25px;
-left: 1260px;
+left: 1000px;
 background: rgba(243, 27, 27, 0.1);
 border: 1px solid rgb(241, 240, 242);
 backdrop-filter: blur(32px);
 }
 .appoint-frame-container{
-width: 320px;
-height: 30px;
+width: 90%;
+height: 34px;
 
-margin-right:15px;
 opacity: 1;
 gap: 10px;
 border-bottom-width: 1px;
-border-top: 14px;
-padding: 16px;
+border-top: 10px;
+padding: 15px;
 background: rgb(250, 250, 250,1);
 border: 1px solid rgba(240, 241, 242, 1);
 backdrop-filter: blur(32px);
-
+border-top-right-radius: 14px;
+border-top-left-radius: 14px;
 /*background: rgb(150, 83, 83);*/
 display: flex;
 justify-content: center;

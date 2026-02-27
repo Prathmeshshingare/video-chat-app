@@ -1,0 +1,90 @@
+.outer-endcall-box-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.outer-box {
+  width: 400px;
+  height: 390px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+.cut-icon {
+  display: flex;
+  justify-content: end;
+}
+.end-call-info-time {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.endcall-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #e93737;
+  border-radius: 50%;
+}
+h5,
+p {
+  margin: 0;
+}
+.time-duration {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 8px 0 0 0;
+  background: #f3f0fa;
+  border-radius: 14px;
+}
+.inner-endcall-box {
+  width: 376px;
+
+  overflow: hidden;
+  border-radius: 14px;
+  border-radius: 14px;
+  background: #f3f0fa;
+  margin-top: 20px;
+  background: linear-gradient(180deg, #f9f6ff, #f3f0fa);
+  border: 1px solid #d8c8ff;
+  border-radius: 14px;
+  padding: 16px;
+}
+.title {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+h4 {
+  margin: 0 0 20px 10px;
+}
+.points {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 400;
+}
+.button-group button {
+  margin-bottom: 8px;
+  font-size: 10px;
+  font-weight: 440;
+  border-radius: 6px;
+  padding: 6px 14px;
+}
+.btns {
+  background: #222;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  height: 35px;
+}

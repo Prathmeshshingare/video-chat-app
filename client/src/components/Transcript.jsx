@@ -16,11 +16,21 @@ const Transcript = ({ notes }) => {
       <div className="conv-container">
         <div className="text-container" ref={scrollRef}>
           {notes ? (
-            notes.split("\n").map((line, index) => (
-              <p key={index} className="transcript-line">
-                {line}
-              </p>
-            ))
+           notes.split("\n").map((line, index) => {
+  const isDoctor = line.startsWith("Doctor:");
+  const isPatient = line.startsWith("Patient:");
+
+  return (
+    <div
+      key={index}
+      className={`transcript-line ${
+        isDoctor ? "doctor-line" : isPatient ? "patient-line" : ""
+      }`}
+    >
+      {line}
+    </div>
+  );
+})
           ) : (
             <p className="placeholder-text">
               Live conversation transcript will appear here...

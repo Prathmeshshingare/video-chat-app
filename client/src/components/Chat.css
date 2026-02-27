@@ -1,32 +1,100 @@
-.chat-container{
-width: 318px;
-height:400px;
-opacity: 1;
-padding: 16px;
-background: rgba(255, 255, 255, 1);
-border: 1px solid rgba(240, 241, 242, 1);
-left: 20px;
+.chat-container {
+ width: 99%;
+  height: 86%;
 
-}
-.send-m-area{
-
-    width: 310px;
-    height:100%;
-    background: rgba(255, 255, 255, 1);
-
-border-width: 1px;
-opacity: 1;
-gap: 12px;
-border: 1px solid rgba(226, 227, 229, 0.4);
-display: flex;
-justify-content: end;
-align-items: end;
-bottom: 5px;
-}
-input{
-     width:100%;
-    height:32px;
-    border: none;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+  overflow: hidden;
+   border: 1px solid rgba(240, 241, 242, 1);
+  backdrop-filter: blur(32px);
+  animation: slideFromRight 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Messages section */
+.messages-area {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
+/* Message bubble */
+/* Message bubble */
+.message {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  word-wrap: break-word;
+  display: inline-block;
+}
+
+/* Sent message (right side) */
+.sent {
+  align-self: flex-end;
+  background: #ebc47d;
+  color: white;
+  border-bottom-right-radius: 4px;
+  text-align: right;
+}
+
+/* Received message (left side) */
+.received {
+  align-self: flex-start;
+  background: #f1f1f1;
+  color: black;
+  border-bottom-left-radius: 4px;
+  text-align: left;
+}
+
+/* Input area */
+.send-m-area {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #eee;
+  gap: 10px;
+  align-items: center;
+}
+
+.send-m-area input {
+  flex: 1;
+  height: 38px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  padding: 0 12px;
+  outline: none;
+}
+
+.send-icon {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.sender-name {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 3px;
+  opacity: 0.7;
+}
+
+.meta {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 11px;
+  margin-top: 4px;
+  gap: 6px;
+  opacity: 0.7;
+}
+
+.time {
+  font-size: 11px;
+}
+
+.status {
+  font-size: 12px;
+}

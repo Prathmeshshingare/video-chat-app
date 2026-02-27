@@ -5,18 +5,19 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 class CallConsumer(AsyncWebsocketConsumer):
     """
     Handles WebRTC signaling for video calls.
-    
+
     Messages handled:
-    - register_role: Identify as Doctor/Patient
-    - offer: WebRTC offer
-    - answer: WebRTC answer
-    - ice: ICE candidates
+    - register_role
+    - offer
+    - answer
+    - ice
+    - chat
     """
 
     async def connect(self):
         self.room_id = self.scope["url_route"]["kwargs"]["room_id"]
         self.room_group_name = f"call_{self.room_id}"
-        self.role = None  # Will be set via register_role
+        self.role = None
 
         # Join room group
         await self.channel_layer.group_add(
@@ -25,7 +26,7 @@ class CallConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
-        print(f"✅ Call Consumer connected to room: {self.room_id}")
+        print(f"✅ Connected to room: {self.room_id}")
 
         # Notify others that someone joined
         await self.channel_layer.group_send(
@@ -42,22 +43,23 @@ class CallConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        print(f"❌ Call Consumer disconnected from room: {self.room_id}")
+        print(f"❌ Disconnected from room: {self.room_id}")
 
     async def receive(self, text_data):
         """
-        Handle incoming messages from WebSocket
+        Handle all incoming messages
         """
         data = json.loads(text_data)
+        message_type = data.get("type")
 
-        # Register role (Doctor or Patient)
-        if data.get("type") == "register_role":
+        # 1️⃣ Register role
+        if message_type == "register_role":
             self.role = data.get("role")
-            print(f"🔑 User registered as: {self.role} in room {self.room_id}")
+            print(f"🔑 Registered as: {self.role}")
             return
 
-        # WebRTC signaling (offer, answer, ice)
-        if data.get("type") in ["offer", "answer", "ice"]:
+        # 2️⃣ WebRTC signaling
+        if message_type in ["offer", "answer", "ice"]:
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -68,10 +70,21 @@ class CallConsumer(AsyncWebsocketConsumer):
             )
             return
 
+        # 3️⃣ Chat
+        if message_type == "chat":
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "chat_message",
+                    "message": data["message"],
+                    "sender": data["sender"],
+                    "id": data["id"],
+                    "timestamp": data["timestamp"],
+                }
+            )
+            return
+
     async def user_joined(self, event):
-        """
-        Notify this user that someone joined the room
-        """
         # Don't send to self
         if self.channel_name == event["sender_channel"]:
             return
@@ -81,11 +94,17 @@ class CallConsumer(AsyncWebsocketConsumer):
         }))
 
     async def webrtc_signal(self, event):
-        """
-        Forward WebRTC signaling messages
-        """
         # Don't send to self
         if self.channel_name == event["sender_channel"]:
             return
 
         await self.send(text_data=json.dumps(event["message"]))
+
+    async def chat_message(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "chat",
+            "message": event["message"],
+            "sender": event["sender"],
+            "id": event.get("id"),
+            "timestamp": event.get("timestamp"),
+        }))

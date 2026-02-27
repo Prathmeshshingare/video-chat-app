@@ -1,11 +1,9 @@
-.right-sidebar-container {
 
-padding: 15px;
+.right-sidebar-container {
+  padding: 15px;
   width: 52px;
-  height: 80vh;
+  height: 77vh;
   border-radius: 16px;
-  margin-top: 35px;
-  right: 165px;
   opacity: 1;
   /*background-color: aqua;*/
   background: #F3F0FA;

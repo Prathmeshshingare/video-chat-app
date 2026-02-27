@@ -14,9 +14,9 @@ const TopNav = ({ isMini, setIsMini }) => {
         <div className="min-btn" onClick={toggleMini}>
           <TbArrowsDiagonalMinimize2 />
         </div>
-         
+           
       </div>
-         <div className="divider" />
+       <div className="divider" />
     </div>
   );
 };
