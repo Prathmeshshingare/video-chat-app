@@ -73,7 +73,7 @@ const VideoRoom = () => {
   /* Create Peer Connection*/
   const navigate = useNavigate();
   useEffect(() => {
-    startCall();
+   startCall();
     if (myStream) {
       setIsCallActive(true); // 🔥 START TIMER
     }
@@ -626,7 +626,6 @@ const VideoRoom = () => {
               <div className="user-badge">Patient</div>
               <div className="timer-badge">{formattedTime}</div>
             </div>
-
             <video
               ref={remoteVideoRef}
               autoPlay
@@ -696,7 +695,7 @@ const VideoRoom = () => {
                 {cameraOn ? (
                   <FaVideo />
                 ) : (
-                  <FaVideoSlash style={{ color: "red" }} />
+                  <FaVideoSlash style={{ color: "red", background:'white' }} />
                 )}
               </button>
 

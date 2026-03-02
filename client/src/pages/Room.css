@@ -56,7 +56,7 @@
   display: flex;
   transition: all 0.3s ease;
 
-  background: rgba(243, 240, 250, 1);
+background: rgba(243, 240, 250, 1);
   backdrop-filter: blur(32px);
   border-radius: 14px;
 }
@@ -67,7 +67,7 @@
   object-fit: cover;
   border-radius: 14px;
 
-  background: rgba(243, 240, 250, 1);
+ /*background: rgba(243, 240, 250, 1);*/
   backdrop-filter: blur(32px);
 }
 
@@ -118,6 +118,7 @@
   width: 100%;
   height: 100%;
   border-radius: 15px;
+  background: rgba(243, 240, 250, 1);
   object-fit: cover;
 }
 
@@ -227,10 +228,6 @@
   background: rgba(243, 240, 250, 1);
   backdrop-filter: blur(32px);
 }
-
-
-
-
 /* ================= MINI MODE ================= */
 
 .call-layout.mini {
