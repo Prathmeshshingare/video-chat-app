@@ -2,7 +2,11 @@ import React from "react";
 import "./AfterEndCall.css";
 import { MdCallEnd } from "react-icons/md";
 import {MdCancel} from 'react-icons/md';
+import { useNavigate ,useLocation} from "react-router-dom";
 const AfterEndCall = ({ setIsCallEnded ,  navigateTo }) => {
+    const location = useLocation();
+  const callDurationD = location.state?.duration || "00:00";
+  const navigate=useNavigate();
   return (
     <div className="outer-endcall-box-container">
       <div className="outer-box">
@@ -16,7 +20,7 @@ const AfterEndCall = ({ setIsCallEnded ,  navigateTo }) => {
           </div>
           <div className="time-duration">
             <p style={{ fontWeight: 20, fontSize: 14 }}>Call Duration:</p>
-            <p>08:00</p>
+            <p>{callDurationD}</p>
           </div>
         </div>
         <div className="inner-endcall-box">
@@ -31,9 +35,9 @@ const AfterEndCall = ({ setIsCallEnded ,  navigateTo }) => {
           </div>
         </div>
         <div  className="button-group" style={{display:'flex' , justifyContent:'space-between' , marginTop:'26px'}}>
-            <button className="btns"  onClick={() =>  navigateTo("transcript")}>View Transcript</button>
+            <button className="btns"  onClick={() =>  navigate("/viewtranscription")}>View Transcript</button>
             <button className="btns">✨Scan Transcript for Ai Insights</button>
-            <button className="btns"  onClick={() =>  navigateTo("feedback")}>Ask for Feedback</button>
+            <button className="btns"  onClick={() =>  navigate("/feedback")}>Ask for Feedback</button>
         </div>
       </div>
     </div>

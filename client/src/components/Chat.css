@@ -37,8 +37,8 @@
 /* Sent message (right side) */
 .sent {
   align-self: flex-end;
-  background: #ebc47d;
-  color: white;
+  background:  #FFF2EE;
+  color: black;
   border-bottom-right-radius: 4px;
   text-align: right;
 }
@@ -46,7 +46,8 @@
 /* Received message (left side) */
 .received {
   align-self: flex-start;
-  background: #f1f1f1;
+background: linear-gradient(0deg, #FAFAFA, #FAFAFA),
+linear-gradient(0deg, rgba(17, 21, 68, 0.01), rgba(17, 21, 68, 0.01));
   color: black;
   border-bottom-left-radius: 4px;
   text-align: left;

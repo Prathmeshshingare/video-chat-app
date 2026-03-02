@@ -4,14 +4,11 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 class CallConsumer(AsyncWebsocketConsumer):
     """
-    Handles WebRTC signaling for video calls.
-
-    Messages handled:
-    - register_role
-    - offer
-    - answer
-    - ice
-    - chat
+    Handles:
+    - WebRTC signaling (offer, answer, ice)
+    - Chat messages
+    - Read receipts
+    - User join notification
     """
 
     async def connect(self):
@@ -28,7 +25,7 @@ class CallConsumer(AsyncWebsocketConsumer):
         await self.accept()
         print(f"✅ Connected to room: {self.room_id}")
 
-        # Notify others that someone joined
+        # Notify others someone joined
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -43,12 +40,10 @@ class CallConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+
         print(f"❌ Disconnected from room: {self.room_id}")
 
     async def receive(self, text_data):
-        """
-        Handle all incoming messages
-        """
         data = json.loads(text_data)
         message_type = data.get("type")
 
@@ -70,22 +65,34 @@ class CallConsumer(AsyncWebsocketConsumer):
             )
             return
 
-        # 3️⃣ Chat
+        # 3️⃣ Chat message
         if message_type == "chat":
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     "type": "chat_message",
-                    "message": data["message"],
-                    "sender": data["sender"],
-                    "id": data["id"],
-                    "timestamp": data["timestamp"],
+                    "message": data.get("message"),
+                    "sender": data.get("sender"),
+                    "id": data.get("id"),
+                    "timestamp": data.get("timestamp"),
                 }
             )
             return
 
+        # 4️⃣ Read receipt
+        if message_type == "read-receipt":
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "read_receipt",
+                    "id": data.get("id"),
+                    "sender_channel": self.channel_name,
+                }
+            )
+            return
+
+    # 🔹 USER JOINED EVENT
     async def user_joined(self, event):
-        # Don't send to self
         if self.channel_name == event["sender_channel"]:
             return
 
@@ -93,18 +100,29 @@ class CallConsumer(AsyncWebsocketConsumer):
             "type": "user-joined"
         }))
 
+    # 🔹 WEBRTC SIGNAL EVENT
     async def webrtc_signal(self, event):
-        # Don't send to self
         if self.channel_name == event["sender_channel"]:
             return
 
         await self.send(text_data=json.dumps(event["message"]))
 
+    # 🔹 CHAT MESSAGE EVENT
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
             "type": "chat",
-            "message": event["message"],
-            "sender": event["sender"],
+            "message": event.get("message"),
+            "sender": event.get("sender"),
             "id": event.get("id"),
             "timestamp": event.get("timestamp"),
+        }))
+
+    # 🔹 READ RECEIPT EVENT
+    async def read_receipt(self, event):
+        if self.channel_name == event["sender_channel"]:
+            return
+
+        await self.send(text_data=json.dumps({
+            "type": "read-receipt",
+            "id": event.get("id"),
         }))
