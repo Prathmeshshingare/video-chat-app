@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./Patient.css";
+import Draggable from "react-draggable";
 import { FaVideo, FaVideoSlash, FaMicrophoneAlt } from "react-icons/fa";
 import { IoMdMicOff } from "react-icons/io";
 import { MdCallEnd } from "react-icons/md";
 import { HiMiniSpeakerWave } from "react-icons/hi2";
 import { HiMiniSpeakerXMark } from "react-icons/hi2";
 import { MdWifiCalling3 } from "react-icons/md";
+import { MdScreenShare } from "react-icons/md";
+import { MdStopScreenShare } from "react-icons/md";
 import RightSideBar from "../components/RightSideBar";
 import Transcript from "../components/Transcript";
 import Chat from "../components/Chat";
@@ -32,6 +35,9 @@ const Patient = () => {
   const audioContextRef = useRef(null);
   const processorRef = useRef(null);
 
+  //for dragable
+  const nodeRefp = useRef(null);
+
   // State
   const [connected, setConnected] = useState(false);
   const [sttConnected, setSttConnected] = useState(false);
@@ -42,19 +48,23 @@ const Patient = () => {
   const [speakerOn, setSpeakerOn] = useState(true);
   const [active, setActive] = useState("");
   const [notes, setNotes] = useState("");
+  const [isMini, setIsMini] = useState(false);
 
   const [isCallActive, setIsCallActive] = useState(false);
   const { formattedTime, resetTimer } = useCallTimer(isCallActive);
   const [chatMessages, setChatMessages] = useState([]);
+
+  const navigate = useNavigate();
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const screenStreamRef = useRef(null);
+  const role = "Patient";
 
   useEffect(() => {
     if (myStream) {
       setIsCallActive(true); // 🔥 START TIMER
     }
   }, [myStream]);
-  /* =========================
-      Create Peer Connection
-  ========================== */
+  /* Create Peer Connection */
   const createPeer = () => {
     peerRef.current = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -78,9 +88,61 @@ const Patient = () => {
     };
   };
 
-  /* =========================
-      Start Camera
-  ========================== */
+  const shareScreen = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+      });
+
+      screenStreamRef.current = screenStream;
+
+      const screenTrack = screenStream.getVideoTracks()[0];
+
+      // Replace video track in peer connection
+      const sender = peerRef.current
+        .getSenders()
+        .find((s) => s.track.kind === "video");
+
+      if (sender) {
+        sender.replaceTrack(screenTrack);
+      }
+
+      // Show screen locally
+      localVideoRef.current.srcObject = screenStream;
+
+      setIsScreenSharing(true);
+
+      // When user clicks "Stop sharing"
+      screenTrack.onended = () => {
+        stopScreenShare();
+      };
+    } catch (err) {
+      console.error("Screen share error:", err);
+    }
+  };
+
+  const stopScreenShare = () => {
+    if (!screenStreamRef.current) return;
+
+    const cameraTrack = localStreamRef.current.getVideoTracks()[0];
+
+    const sender = peerRef.current
+      .getSenders()
+      .find((s) => s.track.kind === "video");
+
+    if (sender && cameraTrack) {
+      sender.replaceTrack(cameraTrack);
+    }
+
+    // Restore local camera preview
+    localVideoRef.current.srcObject = localStreamRef.current;
+
+    screenStreamRef.current.getTracks().forEach((track) => track.stop());
+    screenStreamRef.current = null;
+
+    setIsScreenSharing(false);
+  };
+  /*Start Camera */
   const startCamera = async () => {
     if (localStreamRef.current) return;
 
@@ -107,9 +169,7 @@ const Patient = () => {
     }
   };
 
-  /* =========================
-      Start Call
-  ========================== */
+  /*Start Call*/
   const startCall = async () => {
     setIsCaller(true);
     await startCamera();
@@ -120,9 +180,7 @@ const Patient = () => {
     socketRef.current.send(JSON.stringify({ type: "offer", offer }));
   };
 
-  /* =========================
-      WebRTC Signaling
-  ========================== */
+  /*WebRTC Signaling */
   useEffect(() => {
     // socketRef.current = new WebSocket(`ws://127.0.0.1:8000/ws/call/${roomId}/`);
     socketRef.current = new WebSocket(
@@ -143,17 +201,39 @@ const Patient = () => {
       const data = JSON.parse(e.data);
 
       // 🔥 CHAT MESSAGE
-     if (data.type === "chat") {
-  setChatMessages((prev) =>
-    prev.map((msg) =>
-      msg.id === data.id ? { ...msg, status: "read" } : msg
-    )
-  );
+      if (data.type === "chat") {
+        const isMine = data.sender === role; // use dynamic role
 
-  setChatMessages((prev) => [...prev, { ...data, status: "read" }]);
-  return;
-}
+        console.log("Socket received:", data);
 
+        // Send read receipt only if message is NOT mine
+        if (!isMine) {
+          socketRef.current.send(
+            JSON.stringify({
+              type: "read-receipt",
+              id: data.id,
+            }),
+          );
+        }
+
+        // ✅ Prevent duplicate messages
+        setChatMessages((prev) => {
+          const alreadyExists = prev.some((msg) => msg.id === data.id);
+          if (alreadyExists) return prev;
+          return [...prev, data];
+        });
+
+        return;
+      }
+
+      if (data.type === "read-receipt") {
+        setChatMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === data.id ? { ...msg, status: "read" } : msg,
+          ),
+        );
+        return;
+      }
       if (data.type === "offer") {
         await startCamera();
         await peerRef.current.setRemoteDescription(
@@ -190,9 +270,7 @@ const Patient = () => {
     };
   }, [roomId]);
 
-  /* =========================
-      STT: Connect to Django Gateway
-  ========================== */
+  /*STT: Connect to Django Gateway */
   useEffect(() => {
     if (!myStream) return;
 
@@ -223,8 +301,8 @@ const Patient = () => {
 
         // Patient receives transcripts but doesn't display them
         if (data.type === "transcript") {
-           const newLine = ` ${data.speaker}: ${data.text}\n`;
-           setNotes((prev) => prev +newLine);
+          const newLine = ` ${data.speaker}: ${data.text}\n`;
+          setNotes((prev) => prev + newLine);
         }
 
         if (data.type === "error") {
@@ -252,9 +330,7 @@ const Patient = () => {
     };
   }, [myStream, roomId]);
 
-  /* =========================
-      Capture Audio and Send to Django
-  ========================== */
+  /* Capture Audio and Send to Django */
   const startAudioCapture = () => {
     if (!myStream) return;
 
@@ -310,9 +386,7 @@ const Patient = () => {
       audioContextRef.current = null;
     }
   };
-  /* =========================
-    Toggle Microphone
-========================= */
+  /* Toggle Microphone*/
   const toggleMic = () => {
     if (!localStreamRef.current) return;
 
@@ -323,9 +397,7 @@ const Patient = () => {
     setMicOn((prev) => !prev);
   };
 
-  /* =========================
-    Toggle Camera
-========================= */
+  /*Toggle Camera*/
   const toggleCamera = () => {
     if (!localStreamRef.current) return;
 
@@ -346,9 +418,7 @@ const Patient = () => {
 
     setSpeakerOn((prev) => !prev);
   };
-  /* =========================
-    End Call
-========================= */
+  /*  End Call*/
   const endCall = () => {
     try {
       // Stop sending audio to STT
@@ -399,20 +469,18 @@ const Patient = () => {
     }
   };
 
-  /* =========================
-      UI
-  ========================== */
-  return (
- <div className="consult-containerp">
-      <div className="call-layoutp">
+  /*UI */
+  const contentp = (
+    <div ref={nodeRefp} className="consult-containerp">
+      <div className={`call-layoutp ${isMini ? "mini" : ""}`}>
         {/* VIDEO AREA */}
         <div className="topnavp">
-          <TopNav />
+          <TopNav isMini={isMini} setIsMini={setIsMini} />
         </div>
         <div className="remote-container-and-rightsidebar-divp">
           <div className="remote-containerp">
             <div className="call-headerp">
-              <div className="user-badgep">Patient</div>
+              <div className="user-badgep">Doctor</div>
               <div className="timer-badgep">{formattedTime}</div>
             </div>
 
@@ -443,19 +511,45 @@ const Patient = () => {
                 </button>
               )}
 
-              <button onClick={toggleMic} className="control-btnp">
+              <button
+                onClick={toggleMic}
+                className="control-btnp"
+                disabled={!isCallActive}
+              >
                 {micOn ? (
                   <FaMicrophoneAlt />
                 ) : (
                   <IoMdMicOff style={{ color: "red" }} />
                 )}
               </button>
+              <button
+                onClick={isScreenSharing ? stopScreenShare : shareScreen}
+                className="control-btnp"
+                disabled={!isCallActive}
+              >
+                {isScreenSharing ? <MdStopScreenShare /> : <MdScreenShare />}
+              </button>
 
-              <button className="end-call-circlep" onClick={endCall}>
+              <button
+                className="end-call-circlep"
+                onClick={() => {
+                  const finalDuration = formattedTime; // capture before reset
+                  endCall();
+
+                  navigate("/feedback", {
+                    state: { duration: finalDuration },
+                  });
+                }}
+                disabled={!isCallActive}
+              >
                 <MdCallEnd color="white" />
               </button>
 
-              <button onClick={toggleCamera} className="control-btnp">
+              <button
+                onClick={toggleCamera}
+                className="control-btnp"
+                disabled={!isCallActive}
+              >
                 {cameraOn ? (
                   <FaVideo />
                 ) : (
@@ -463,7 +557,11 @@ const Patient = () => {
                 )}
               </button>
 
-              <button onClick={toggleSpeaker} className="control-btnp">
+              <button
+                onClick={toggleSpeaker}
+                className="control-btnp"
+                disabled={!isCallActive}
+              >
                 {speakerOn ? (
                   <HiMiniSpeakerWave />
                 ) : (
@@ -474,17 +572,19 @@ const Patient = () => {
           </div>
 
           {/* SIDEBAR — OUTSIDE */}
-       <div className={`sidebar-wrapperp ${active ? "active" : ""}`}>
+          <div className={`sidebar-wrapperp ${active ? "active" : ""}`}>
             {!active && <RightSideBar active={active} setActive={setActive} />}
             {active && (
               <div className="sidebar-sectionp">
                 <AppointmentDetails active={active} setActive={setActive} />
-                {active === "chat" &&  <Chat
-    socket={socketRef.current}
-    role="Patient"
-    messages={chatMessages}
-    setMessages={setChatMessages}
-  />}
+                {active === "chat" && (
+                  <Chat
+                    socket={socketRef.current}
+                    role="Patient"
+                    messages={chatMessages}
+                    setMessages={setChatMessages}
+                  />
+                )}
                 {active === "Transcript" && <Transcript notes={notes} />}
                 {active === "info" && <Information />}
                 {active === "appt" && <Appointment />}
@@ -505,6 +605,11 @@ const Patient = () => {
         )}
       </div>
     </div>
+  );
+  return (
+    <>
+      {isMini ? <Draggable nodeRef={nodeRefp}>{contentp}</Draggable> : contentp}
+    </>
   );
 };
 

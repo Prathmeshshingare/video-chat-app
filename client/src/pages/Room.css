@@ -8,8 +8,7 @@
   padding: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(15px);
+  align-items: cente
 }
 
 /* ================= MAIN LAYOUT ================= */
@@ -107,10 +106,12 @@
 
 .local-container {
   position: absolute;
-  right: 20px;
+  right: 30px;
   bottom: 90px;
-  width: 220px;
-  height: 160px;
+  width: 23%;
+  height: 28%;
+  background: rgba(243, 240, 250, 1);
+   border-radius: 15px;
 }
 
 .local-video {
@@ -225,4 +226,73 @@
 
   background: rgba(243, 240, 250, 1);
   backdrop-filter: blur(32px);
+}
+
+
+
+
+/* ================= MINI MODE ================= */
+
+.call-layout.mini {
+  position: fixed;
+  width: 420px;
+  height: 440px;
+  bottom: 20px;
+  right: 20px;
+  border-radius: 20px;
+  z-index: 999;
+  transition: all 0.3s ease;
+}
+
+/* Hide top nav in mini */
+.call-layout.mini .topnav {
+    padding: 6px 10px;
+}
+
+/* Remove padding and gap */
+.call-layout.mini .remote-container-and-rightsidebar-div {
+  padding: 0;
+  gap: 0;
+  
+}
+
+/* Hide sidebar completely */
+.call-layout.mini .sidebar-wrapper {
+  display: none;
+}
+
+/* Remote video full area */
+.call-layout.mini .remote-container {
+  border-radius: 20px;
+}
+
+/* Smaller local video */
+.call-layout.mini .local-container {
+  width: 35%;
+  height: 35%;
+  bottom: 60px;
+  right: 10px;
+}
+
+/* Compact controls */
+.call-layout.mini .call-controls {
+  bottom: 8px;
+  gap: 12px;
+}
+
+.call-layout.mini .control-btn {
+  width: 35px;
+  height: 35px;
+  font-size: 14px;
+}
+
+.call-layout.mini .end-call-circle {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+/* Hide header badges in mini */
+.call-layout.mini .call-header {
+ 
 }

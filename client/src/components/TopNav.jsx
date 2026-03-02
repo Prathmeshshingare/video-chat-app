@@ -11,7 +11,7 @@ const TopNav = ({ isMini, setIsMini }) => {
     <div className={`topnav ${isMini ? "mini" : ""}`}>
       <div className="topnav-inner">
         <div className="title">Video Call</div>
-        <div className="min-btn" onClick={toggleMini}>
+        <div className="min-btn"  onClick={() => setIsMini(prev => !prev)}>
           <TbArrowsDiagonalMinimize2 />
         </div>
            

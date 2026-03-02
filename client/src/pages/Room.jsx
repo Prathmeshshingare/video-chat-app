@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import Draggable from "react-draggable";
 import "./Room.css";
 // import PatientClinicDropdown from "../components/PatientClinicDropdown";
 import { IoPersonAdd } from "react-icons/io5";
@@ -9,6 +10,8 @@ import { MdCallEnd } from "react-icons/md";
 import { HiMiniSpeakerWave } from "react-icons/hi2";
 import { HiMiniSpeakerXMark } from "react-icons/hi2";
 import { MdWifiCalling3 } from "react-icons/md";
+import { MdScreenShare } from "react-icons/md";
+import { MdStopScreenShare } from "react-icons/md";
 import RightSideBar from "../components/RightSideBar";
 import Transcript from "../components/Transcript";
 import Chat from "../components/Chat";
@@ -17,9 +20,9 @@ import Appointment from "../components/Appointment";
 import AppointmentDetails from "../components/AppointmentDetails";
 import TopNav from "../components/TopNav";
 
-//import AfterEndCall from "../components/AfterEndCall";
-//import FeedBack from "../components/FeedBack";
-//import FullTranscription from "../components/FullTranscription";
+import AfterEndCall from "../components/AfterEndCall";
+import FeedBack from "../components/FeedBack";
+import FullTranscription from "../components/FullTranscription";
 import useCallTimer from "../hooks/useCallTimer";
 const VideoRoom = () => {
   const { roomId } = useParams();
@@ -33,6 +36,9 @@ const VideoRoom = () => {
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
   const remoteStreamRef = useRef(new MediaStream());
+
+  //for dragable
+  const nodeRef = useRef(null);
 
   // STT refs
   const sttSocketRef = useRef(null);
@@ -57,34 +63,26 @@ const VideoRoom = () => {
   const [isCallActive, setIsCallActive] = useState(false);
   const { formattedTime, resetTimer } = useCallTimer(isCallActive);
   const [chatMessages, setChatMessages] = useState([]);
-  /*const [previousView, setPreviousView] = useState(null);
-    const [viewMode, setViewMode] = useState("call");*/
-  /* =========================
-      Create Peer Connection
-  ========================== */
+  const [previousView, setPreviousView] = useState(null);
+  const [viewMode, setViewMode] = useState("");
+  const [isMini, setIsMini] = useState(false);
+
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const screenStreamRef = useRef(null);
+  const role = "Doctor";
+  /* Create Peer Connection*/
+  const navigate = useNavigate();
   useEffect(() => {
+    startCall();
     if (myStream) {
       setIsCallActive(true); // 🔥 START TIMER
     }
   }, [myStream]);
 
-  /*  const navigateTo = (mode) => {
-  setPreviousView(viewMode);
-  setViewMode(mode);
-};
- // If Transcript mode
-if (viewMode === "transcript") {
-  return <FullTranscription navigateTo={navigateTo} previousView={previousView}  />; 
-}
-
-// If End Call mode
-if (viewMode === "end") {
-  return <AfterEndCall navigateTo={navigateTo} />
-}*/
-  /*if (viewMode === "feedback") {
-  return<FeedBack navigateTo={navigateTo} previousView={previousView} />
-}
-*/
+  const navigateTo = (mode) => {
+    setPreviousView(viewMode);
+    setViewMode(mode);
+  };
 
   const createPeer = () => {
     peerRef.current = new RTCPeerConnection({
@@ -105,9 +103,61 @@ if (viewMode === "end") {
       }
     };
   };
-  /* =========================
-      Start Camera
-  ========================== */
+
+  const shareScreen = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+      });
+
+      screenStreamRef.current = screenStream;
+
+      const screenTrack = screenStream.getVideoTracks()[0];
+
+      // Replace video track in peer connection
+      const sender = peerRef.current
+        .getSenders()
+        .find((s) => s.track.kind === "video");
+
+      if (sender) {
+        sender.replaceTrack(screenTrack);
+      }
+
+      // Show screen locally
+      localVideoRef.current.srcObject = screenStream;
+
+      setIsScreenSharing(true);
+
+      // When user clicks "Stop sharing"
+      screenTrack.onended = () => {
+        stopScreenShare();
+      };
+    } catch (err) {
+      console.error("Screen share error:", err);
+    }
+  };
+  const stopScreenShare = () => {
+    if (!screenStreamRef.current) return;
+
+    const cameraTrack = localStreamRef.current.getVideoTracks()[0];
+
+    const sender = peerRef.current
+      .getSenders()
+      .find((s) => s.track.kind === "video");
+
+    if (sender && cameraTrack) {
+      sender.replaceTrack(cameraTrack);
+    }
+
+    // Restore local camera preview
+    localVideoRef.current.srcObject = localStreamRef.current;
+
+    screenStreamRef.current.getTracks().forEach((track) => track.stop());
+    screenStreamRef.current = null;
+
+    setIsScreenSharing(false);
+  };
+  /* Start Camera*/
   const startCamera = async () => {
     if (localStreamRef.current) return;
 
@@ -134,9 +184,7 @@ if (viewMode === "end") {
     }
   };
 
-  /* =========================
-      Start Call
-  ========================== */
+  /*Start Call */
   const startCall = async () => {
     setIsCaller(true);
     await startCamera();
@@ -157,9 +205,7 @@ if (viewMode === "end") {
 
     setSpeakerOn((prev) => !prev);
   };
-  /* =========================
-      WebRTC Signaling
-  ========================== */
+  /*WebRTC Signaling*/
   useEffect(() => {
     // socketRef.current = new WebSocket(`ws://127.0.0.1:8000/ws/call/${roomId}/`);
     socketRef.current = new WebSocket(
@@ -181,13 +227,36 @@ if (viewMode === "end") {
 
       // 🔹 CHAT HANDLER
       if (data.type === "chat") {
+        const isMine = data.sender === role; // use dynamic role
+
+        console.log("Socket received:", data);
+
+        // Send read receipt only if message is NOT mine
+        if (!isMine) {
+          socketRef.current.send(
+            JSON.stringify({
+              type: "read-receipt",
+              id: data.id,
+            }),
+          );
+        }
+
+        // ✅ Prevent duplicate messages
+        setChatMessages((prev) => {
+          const alreadyExists = prev.some((msg) => msg.id === data.id);
+          if (alreadyExists) return prev;
+          return [...prev, data];
+        });
+
+        return;
+      }
+
+      if (data.type === "read-receipt") {
         setChatMessages((prev) =>
           prev.map((msg) =>
             msg.id === data.id ? { ...msg, status: "read" } : msg,
           ),
         );
-
-        setChatMessages((prev) => [...prev, { ...data, status: "read" }]);
         return;
       }
       if (data.type === "offer") {
@@ -226,9 +295,7 @@ if (viewMode === "end") {
     };
   }, [roomId]);
 
-  /* =========================
-      STT: Connect to Django Gateway
-  ========================== */
+  /* STT: Connect to Django Gateway*/
   useEffect(() => {
     if (!myStream) return;
 
@@ -289,9 +356,7 @@ if (viewMode === "end") {
     };
   }, [myStream, roomId]);
 
-  /* =========================
-      Capture Audio and Send to Django
-  ========================== */
+  /* Capture Audio and Send to Django */
   const startAudioCapture = () => {
     if (!myStream) return;
 
@@ -348,9 +413,7 @@ if (viewMode === "end") {
     }
   };
 
-  /* =========================
-    Toggle Microphone
-========================= */
+  /* Toggle Microphone */
   const toggleMic = () => {
     if (!localStreamRef.current) return;
 
@@ -361,9 +424,7 @@ if (viewMode === "end") {
     setMicOn((prev) => !prev);
   };
 
-  /* =========================
-    Toggle Camera
-========================= */
+  /*Toggle Camera*/
   const toggleCamera = () => {
     if (!localStreamRef.current) return;
 
@@ -374,9 +435,7 @@ if (viewMode === "end") {
     setCameraOn((prev) => !prev);
   };
 
-  /* =========================
-      Save Notes to Database
-  ========================== */
+  /*Save Notes to Database*/
   const saveNotes = async () => {
     if (!notes.trim()) {
       alert("No notes to save");
@@ -418,9 +477,7 @@ if (viewMode === "end") {
       setIsSaving(false);
     }
   };
-  /* =========================
-    End Call
-========================= */
+  /* End Call*/
   const endCall = () => {
     try {
       // Stop sending audio to STT
@@ -470,11 +527,10 @@ if (viewMode === "end") {
     }
   };
 
-  /* =========================
-      UI
-  ========================== */
-  return (
-    <div className="consult-container">
+  /* UI*/
+
+  const content = (
+    <div ref={nodeRef} className="consult-container">
       {/* <div
         style={{
           marginBottom: 20,
@@ -559,10 +615,10 @@ if (viewMode === "end") {
           </button>
         )}
       </div>*/}
-      <div className="call-layout">
+      <div className={`call-layout ${isMini ? "mini" : ""}`}>
         {/* VIDEO AREA */}
         <div className="topnav">
-          <TopNav />
+          <TopNav isMini={isMini} setIsMini={setIsMini} />
         </div>
         <div className="remote-container-and-rightsidebar-div">
           <div className="remote-container">
@@ -592,25 +648,51 @@ if (viewMode === "end") {
 
             {/* Controls */}
             <div className="call-controls">
-              {!isCaller && (
-                <button className="control-btn" onClick={startCall}>
-                  <MdWifiCalling3 />
-                </button>
-              )}
+              {/*}  {!isCaller && (
+                  <button className="control-btn" onClick={startCall}>
+                    <MdWifiCalling3 />
+                  </button>
+                )}*/}
 
-              <button onClick={toggleMic} className="control-btn">
+              <button
+                onClick={toggleMic}
+                className="control-btn"
+                disabled={!isCallActive}
+              >
                 {micOn ? (
                   <FaMicrophoneAlt />
                 ) : (
                   <IoMdMicOff style={{ color: "red" }} />
                 )}
               </button>
+              <button
+                onClick={isScreenSharing ? stopScreenShare : shareScreen}
+                className="control-btn"
+                disabled={!isCallActive}
+              >
+                {isScreenSharing ? <MdStopScreenShare /> : <MdScreenShare />}
+              </button>
 
-              <button className="end-call-circle" onClick={endCall}>
+              <button
+                className="end-call-circle"
+                onClick={() => {
+                  const finalDurationD = formattedTime; // capture before reset
+                  endCall();
+
+                  navigate("/callended", {
+                    state: { duration: finalDurationD },
+                  });
+                }}
+                disabled={!isCallActive}
+              >
                 <MdCallEnd color="white" />
               </button>
 
-              <button onClick={toggleCamera} className="control-btn">
+              <button
+                onClick={toggleCamera}
+                className="control-btn"
+                disabled={!isCallActive}
+              >
                 {cameraOn ? (
                   <FaVideo />
                 ) : (
@@ -618,7 +700,11 @@ if (viewMode === "end") {
                 )}
               </button>
 
-              <button onClick={toggleSpeaker} className="control-btn">
+              <button
+                onClick={toggleSpeaker}
+                className="control-btn"
+                disabled={!isCallActive}
+              >
                 {speakerOn ? (
                   <HiMiniSpeakerWave />
                 ) : (
@@ -661,26 +747,7 @@ if (viewMode === "end") {
           ></div>
         )}
       </div>
-      {/*<div className="speech-container">
-        <h3>📝 Consultation Notes</h3>
-        <textarea
-          rows="15"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Live conversation transcript will appear here..."
-          style={{
-            width: "100%",
-            padding: "10px",
-            fontSize: 14,
-            height: "140px",
-            fontFamily: "monospace",
-            border: "1px solid #ccc",
-            borderRadius: 5,
-            marginTop: 10,
-            resize: "vertical",
-          }}
-        />
-
+      {/*
         <div>
           <button
             onClick={saveNotes}
@@ -701,6 +768,8 @@ if (viewMode === "end") {
       </div>*/}
     </div>
   );
+  return (
+    <>{isMini ? <Draggable nodeRef={nodeRef}>{content}</Draggable> : content}</>
+  );
 };
-
 export default VideoRoom;

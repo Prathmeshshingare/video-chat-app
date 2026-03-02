@@ -19,7 +19,11 @@ const Chat = ({ socket, role, messages, setMessages }) => {
       message: message,
       sender: role,
       id: Date.now(),
-      timestamp: new Date().toLocaleTimeString(),
+       timestamp: new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }),
       status: "sent",
     };
 
@@ -54,7 +58,7 @@ const Chat = ({ socket, role, messages, setMessages }) => {
                 <span className="time">{msg.timestamp}</span>
                 {isMine && (
                   <span className="status">
-                    {msg.status === "read" ? "✓✓" : "✓"}
+                    
                   </span>
                 )}
               </div>
